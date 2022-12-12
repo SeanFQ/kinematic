@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wed-based EBSD Tool</title>
+
+  <style type="text/css">#JmolDiv { width:100%; height:1000px; position:relative; z-index:1000}</style>
+  <style type="text/css">#ThreeDiv { width:100%;}</style>
+  <script src="./resources/jmol/jsmol/JSmol.min.js" type="text/javascript"></script>
+  <script src="./resources/math.js"></script>
+
+</head>
+<body>
+
+<script type="text/javascript">var myJmol = 'myJmol';
+    var JmolInfo = {
+     width:'100%',
+     height:'100%',
+     j2sPath:'./resources/jmol/jsmol/j2s',
+     serverURL:'./resources/jmol/jsmol/php/jsmol.php',
+     use:'html5'
+    }
+    $(document).ready(function(){
+      $('#JmolDiv').html( Jmol.getAppletHtml(myJmol, JmolInfo) );
+      Jmol.script(myJmol, `load ./Model/GaN.cif {445,665,-1};set antialiasDisplay ON;set EchoCallback "locate";bind "LEFT+drag" "+:show rotation";show rotation;set logLevel 4`);
+    });
+    </script>
+
+<form action="/action_page.php">
+  <label for="CrystalFile">Crystal Model:</label>
+  <select name="Cif" id="Cif">
+    <option value="GaN">Wurtzite</option>
+    <option value="Zincblende">Zincblende</option>
+  </select>
+  <label for="CubeImages">Accelerating voltage:</label>
+  <select name="EAV" id="EAV">
+    <option value=20>20keV</option>
+    <option value=10>10keV</option>
+    <option value=5>5keV</option>
+  </select>
+  <input type="button" onclick="TextureChange()" value="Submit">
+</form>
+
+
+
+<table>
+  <tr>
+  <td>
+    <div id='JmolDiv' style="width:50vmin; height:50vmin;"></div>
+  </td>
+  <td>
+    <div id='ThreeDiv'></div>
+  </td>
+  </tr>
+</table>
+
+
+H: <input type="number" id="HInput">
+K: <input type="number" id="KInput">
+i: <span id="IInputs"></span> 
+L: <input type="number" id="LInput">
+<input type="button" onclick="SubmitVals()" value="Submit">
+
+<script type="text/javascript">
+  Jmol.jmolButton(myJmol, "reset;set MessageCallback 'reset'", "Reset to original orientation");
+ </script>
+
+<script src="./resources/three.js/build/three.min.js"></script>
+<script src="./render.js"></script>
+
+</body>
+</html>
