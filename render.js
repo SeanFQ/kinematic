@@ -34,14 +34,6 @@ const plancksconstant = 6.62607004*10**-34; //plancks constant
 const a0 = 5.29177210903*10**-11; //Bohr radius
 var beamV = 20000; // accelerating voltage of electron beam
 
-//original atom positions
-const GaX = 0.66667;
-const GaY = 0.33333;
-const GaZ = 0.00000;
-const NX = 0.66667;
-const NY = 0.33333;
-const NZ = 0.37500;
-
 //coordinates of Ga atoms in units cell:
 var Ga1x = 1 / 3;
 var Ga1y = 2 / 3;
@@ -96,9 +88,8 @@ function loopHKL(maxHKL) {
     let i = 0 - r.h - r.k;
     let rtext = ("(" + r.h + " " + r.k + " " + i + " " + r.l + ")\t|F|=" + r.F + "\tMult=" + r.mult + "\n");
     //console.log(rtext);
-   // textArea.innerHTML += rtext;
   });
-  //console.log(reflectors);
+  console.log(reflectors);
 }
 
 function calcSF(h, k, l, twod){
@@ -164,113 +155,33 @@ function calc2d(h, k, l){
   return 2 * a / Math.sqrt(4 / 3 * (h * h + h * k + k * k) + Math.pow(a * l / c, 2));
 }
 
-
-// finds atoms positions for large unit cell, by taking symmetry group operations and multiplying them by the original atom positions
-function atompos(xpos,ypos,zpos) {
-  const AtomPositions = [[xpos,ypos,zpos],[-xpos,-xpos+ypos,1/2+zpos],[xpos-ypos,xpos,1/2+zpos],[-ypos,-xpos,zpos],[-ypos,xpos-ypos,zpos],[xpos-ypos,-ypos,1/2+zpos],[-xpos,-ypos,1/2+zpos],[xpos,xpos-ypos,zpos],[-xpos+ypos,-xpos,zpos],[ypos,xpos,1/2+zpos],[ypos,-xpos+ypos,1/2+zpos],[-xpos+ypos,ypos,zpos]]
-  return AtomPositions;
-}
-
-var GaAtomPos = atompos(GaX,GaY,GaZ);
-var NAtomPos = atompos(NX,NY,NZ);
-
-
-//cromer-mann coeffiecients
-//                       a1          a2          a3          a4          c          b1          b2            b3        b4
-const GaCromerMann = [15.23540,   6.700600,   4.359100,   2.962300,   1.718900,  3.066900,   0.2412000,   10.78050,  61.41350];
-const  NCromerMann = [12.21260,   3.132200,   2.012500,   1.166300,  -11.52900,  5.7000001E-03, 9.893300, 28.99750,  0.5826000];
-
 // calculating the wavelength of the beam
 var lamda = plancksconstant/(Math.sqrt(2*me*e*beamV*(1+(e/2*me*(lightspeed)**2)*beamV)));
 
-// calculating the magnitude of the scattering vector
-const Q = 2*((2*math.PI)/lamda)*math.sin(math.pi/2)
-
-//calculating electron atomic scattering factor - by calculating the x-ray scattering factor and the using the Mott-Bethe formula to find the electron scattering factor where Z is the atomic number
-function ElectronASF(Z,CM){
-  let XRayASF = 0
-  // Cromerman coeffiecents ai, bi, and c in one array so ai = [i], bi = [i+5], c = [4]
-  for (let j = 0; j <= 3; j++) {
-    XRayASF += CM[j]*math.exp(-CM[j+5]*((Q/(4*math.PI))**2))+CM[4];
-  }
-  EASF = (1/(8*(math.PI**2)*a0))*((Z-XRayASF)/((Q/(2*Math.PI))**2))
-  return EASF;
-}
-
-const GaASF = ElectronASF(31,GaCromerMann)  //*0+31;
-const NASF = ElectronASF(7,NCromerMann)     //*0+7;
-
-//calculating structure factor and its magnitude
-function StructureFactor(h,k,l){
-  let Ga = math.complex(0,0)
-  for(let j = 0; j < GaAtomPos.length; j++){
-    Ga = math.add(Ga,math.complex(math.cos((2*math.pi)*(h*GaAtomPos[j][0]+k*GaAtomPos[j][1]+l*GaAtomPos[j][2])),math.sin((2*math.pi)*((h*GaAtomPos[j][0]+k*GaAtomPos[j][1]+l*GaAtomPos[j][2])))));
-  }
-  let N = math.complex(0,0)
-  for(let j = 0; j < NAtomPos.length; j++){
-    let Apos = NAtomPos[j]
-    N = math.add(N,math.complex(math.cos((2*math.pi)*(h*NAtomPos[j][0]+k*NAtomPos[j][1]+l*NAtomPos[j][2])),math.sin((2*math.pi)*(h*NAtomPos[j][0]+k*NAtomPos[j][1]+l*NAtomPos[j][2]))));
-  }
-
- //neither of these equations produce the correct result
-
-  const Shkl = math.add(math.multiply(GaASF,Ga),math.multiply(NASF,N));
-  const magShkl = math.sqrt(((Shkl.re)**2)+((Shkl.im)**2))
-  return magShkl;
-}
-
-
-let p = [];
-let pstruc = [];
-
-for (let h = 0; h <= 4; h++) {
-  for (let k = 0; k <= 3; k++) {
-    for (let l = 0; l <= 8; l++) {
-      p.push([h, k, l]);
-      pstruc.push(StructureFactor(h,k,l))
-     }
-  }
-}
-
-let SF = [];
-
-for (let j = 0;j<p.length;j++) {
-  SF.push({plane:p[j], StructureF:pstruc[j]})
-}
-
-SF.sort(function(a,b){return a.StructureF - b.StructureF});
-SF.reverse();
-
-
 function kinematic(){
-  let maximumS = math.max(pstruc)
-  let maxlocations = [];
-  for(j = 0;j<pstruc.length;j++) {
-    if (pstruc[j] == maximumS){
-      maxlocations.push(j);
-    }
-  }
+  loopHKL(6)
+  let maximumS = reflectors[0].F
   let rads = 0.301;
-  for(j = 0; j<pstruc.length;j++){
-    if(pstruc[j]>0.01*maximumS){
-      let intensity = Number(pstruc[j]/maximumS)
+  for(j = 0; j<reflectors.length;j++){
+    if(reflectors[j].F>0.01*maximumS){
+      let intensity = reflectors[j].F/maximumS
       console.log(intensity)
-      let h = Number(p[j][0])
-      let k = Number(p[j][1])
-      let i = Number(-(h+k))
-      let l = Number(p[j][2])
+      let h = reflectors[j].h
+      let k = reflectors[j].k
+      let i = -(h+k)
+      let l = reflectors[j].l
       let radius = rads + 0.001*j
-      Highlight(h,k,i,l,intensity,radius)
+      Highlight(h,k,i,l,intensity,radius,reflectors[j].mult)
     }
 
   }
 }
 
-function Highlight(h,k,i,l,intensity,radius) {
+function Highlight(h,k,i,l,intensity,radius,bandnumber) {
   //Creates a band from an input by calculating positon
   let opacitie = Number(intensity)
   let width = bandWidth(h,k,l,radius);
-  let bandnumber = Number(Multiplicity(h,k,i));
+  //let bandnumber = Number(Multiplicity(h,k,i));
   var cylGeometry = new THREE.CylinderGeometry(radius, radius, width, 30, 30, true);
   var cylMaterial = new THREE.MeshBasicMaterial({color: 0xFFFFFF, side: THREE.DoubleSide, transparent: true, opacity: opacitie});
   const N2A = N2Aangle(h,k,i,l)
@@ -513,4 +424,4 @@ init();
 animate();
 kinematic();
 
-console.log(SF)
+//console.log(SF)
