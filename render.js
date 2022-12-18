@@ -161,7 +161,7 @@ var lamda = plancksconstant/(Math.sqrt(2*me*e*beamV*(1+(e/2*me*(lightspeed)**2)*
 function kinematic(){
   loopHKL(6)
   let maximumS = reflectors[0].F
-  let rads = 0.301;
+  let radius = 0.301;
   for(j = 0; j<reflectors.length;j++){
     if(reflectors[j].F>0.01*maximumS){
       let intensity = reflectors[j].F/maximumS
@@ -170,7 +170,7 @@ function kinematic(){
       let k = reflectors[j].k
       let i = -(h+k)
       let l = reflectors[j].l
-      let radius = rads + 0.001*j
+      //let radius = rads + 0.001*j
       Highlight(h,k,i,l,intensity,radius,reflectors[j].mult)
     }
 
@@ -295,9 +295,9 @@ function N2Cangle(h,k,i,l) {
 
 function HighlightBands(h,k,i,l) {
   //Creates a band from an input by calculating positon
-  let width = bandWidth(h,k,l,0.3);
+  let width = bandWidth(h,k,l,0.2);
   let bandnumber = Number(Multiplicity(h,k,i));
-  var cylGeometry = new THREE.CylinderGeometry(0.3, 0.3, width, 30, 30, true);
+  var cylGeometry = new THREE.CylinderGeometry(0.2, 0.2, width, 30, 30, true);
   var cylMaterial = new THREE.MeshBasicMaterial({color: 0xFF0000, side: THREE.DoubleSide, transparent: true, opacity: 0.3});
   const N2A = N2Aangle(h,k,i,l)
   const N2C = N2Cangle(h,k,i,l)
